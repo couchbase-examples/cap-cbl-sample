@@ -1,0 +1,7 @@
+{
+  "name": "cap-cbl-travel",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
