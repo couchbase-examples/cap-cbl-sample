@@ -1,9 +1,12 @@
 {
-  "name": "cap-cbl-travel",
+  "name": "cap-cbl-sample",
   "private": true,
   "version": "0.0.1",
   "type": "module",
   "scripts": {
+    "clean": "rm -rf dist",
+    "verify:ios": "cd ios/App && pod install && xcodebuild -workspace App.xcworkspace -scheme App -destination generic/platform=iOS CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO && cd ../..",
+    "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -12,23 +15,27 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@capacitor/app": "7.0.0",
-    "@capacitor/core": "7.0.0",
-    "@capacitor/haptics": "7.0.0",
-    "@capacitor/keyboard": "7.0.0",
-    "@capacitor/status-bar": "7.0.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/haptics": "^6.0.2",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/keyboard": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.2",
     "@ionic/react": "^8.0.0",
     "@ionic/react-router": "^8.0.0",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "cbl-ionic": "^0.2.6",
     "ionicons": "^7.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router": "^5.3.4",
-    "react-router-dom": "^5.3.4"
+    "react-router-dom": "^5.3.4",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@capacitor/cli": "7.0.0",
+    "@capacitor/cli": "^6.2.0",
     "@testing-library/dom": ">=7.21.4",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
