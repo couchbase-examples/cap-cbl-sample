@@ -257,7 +257,7 @@ export class DatabaseService {
      */
   private async setupReplicator() {
     const collection = await this.getCollection();
-    const targetUrl = new URLEndpoint('wss://qpzh8qc7npo4gl1.apps.cloud.couchbase.com:4984/hotel');
+    const targetUrl = new URLEndpoint('');
     const auth = new BasicAuthenticator('demo@example.com', 'P@ssw0rd12');
 
     const config = new ReplicatorConfiguration(targetUrl);
