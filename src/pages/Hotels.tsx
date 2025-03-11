@@ -19,6 +19,8 @@ import {
   IonIcon,
   IonModal,
   IonButtons,
+  IonSpinner,
+  useIonViewWillEnter
 } from "@ionic/react";
 import { addOutline, closeOutline } from "ionicons/icons";
 
@@ -27,17 +29,38 @@ import DatabaseContext from "../providers/DatabaseContext";
 import { addHotel } from "../hooks/addHotel";
 import { deleteHotel } from "../hooks/deleteHotel";
 import useHotels from "../hooks/useHotels";
+import { getHotels } from "../hooks/getHotels";
 
 const Hotels: React.FC = () => {
   const { databaseService } = useContext(DatabaseContext)!;
   const history = useHistory();
 
-  const { hotels, error } = useHotels(databaseService);
+  // const { hotels, error } = useHotels(databaseService);
+
+  const [hotels, setHotels] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [newHotelName, setNewHotelName] = useState("");
   const [newHotelDescription, setNewHotelDescription] = useState("");
+
+  useIonViewWillEnter(() => {
+    loadHotels();
+  });
+
+  async function loadHotels() {
+    setIsLoading(true);
+    setErrorMessage("");
+    try {
+      const data = await getHotels(databaseService);
+      setHotels(data || []);
+    } catch (error: any) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   async function handleAddHotel() {
     if (!newHotelName || !newHotelDescription) {
@@ -54,12 +77,13 @@ const Hotels: React.FC = () => {
       setNewHotelName("");
       setNewHotelDescription("");
       setShowModal(false);
+      await loadHotels();
     } catch (error: any) {
       setErrorMessage(error.message);
     }
   }
 
-  // Use metadata_id for editing/updating
+  // Use metadata_id for updating
   function goToEditHotel(metadataId: string) {
     history.push(`/hotels/edit/${metadataId}`);
   }
@@ -68,6 +92,7 @@ const Hotels: React.FC = () => {
     try {
       setErrorMessage("");
       await deleteHotel(databaseService, hotel, metadataId);
+      await loadHotels();
     } catch (error: any) {
       setErrorMessage(error.message);
     }
@@ -82,15 +107,21 @@ const Hotels: React.FC = () => {
       </IonHeader>
 
       <IonContent fullscreen>
-        {error || errorMessage ? (
+        { isLoading ? 
+          (
+          <div style={{ textAlign: "center", marginTop: "50%" }}>
+            <IonSpinner />
+          </div>
+          ) : errorMessage ? (
           <IonLabel color="danger" className="ion-padding">
-            {error ?? errorMessage}
+            { errorMessage}
           </IonLabel>
         ) : hotels.length === 0 ? (
           <IonLabel className="ion-padding">No hotels found.</IonLabel>
         ) : (
           <IonList>
-            {hotels.map((doc: any) => (
+            {hotels.slice().reverse().
+            map((doc: any) => (
               <IonCard key={doc.metadata_id} color="light">
                 <IonCardHeader>
                   <IonCardTitle>{doc.name}</IonCardTitle>

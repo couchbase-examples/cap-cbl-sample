@@ -114,8 +114,8 @@ export class DatabaseService {
      */
     public async getHotels() {
         try {
-            const queryStr = "SELECT meta().id AS metadata_id, hotel.* FROM inventory.hotel AS hotel";
-            return this.database?.createQuery(queryStr).execute();
+          const queryStr = "SELECT meta().id AS metadata_id, hotel.name, hotel.description FROM inventory.hotel AS hotel";
+          return this.database?.createQuery(queryStr).execute();
         } catch (error) {
             console.debug(`Error: ${error}`);
             throw error;
