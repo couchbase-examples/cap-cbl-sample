@@ -30,6 +30,9 @@ export class DatabaseService {
 
     private hotelsLiveQuery: Query | null = null;
 
+    /** Shared in-flight/completed initialization, so the database is opened and the replicator started at most once. */
+    private initialization: Promise<void> | undefined;
+
     constructor() {
         //must create a new engine to use the SDK in a Ionic Capacitor environment environment
 
@@ -39,10 +42,22 @@ export class DatabaseService {
 
     /**
      * Initializes the database by setting up logging and configuring the database.
+     * Idempotent: concurrent or repeated calls share one initialization. A failed
+     * initialization is not cached, so callers may retry.
      * @public
      * @throws Will throw an error if the database initialization fails.
      */
-    public async initializeDatabase() {
+    public initializeDatabase(): Promise<void> {
+        if (!this.initialization) {
+            this.initialization = this.doInitializeDatabase().catch((error) => {
+                this.initialization = undefined;
+                throw error;
+            });
+        }
+        return this.initialization;
+    }
+
+    private async doInitializeDatabase() {
         try {
             //turned on database logging too verbose to see information in IDE
             await Database.setLogLevel(LogDomain.ALL, LogLevel.DEBUG);

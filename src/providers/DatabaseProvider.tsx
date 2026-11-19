@@ -8,21 +8,29 @@ interface DatabaseProviderProps {
 }
 
 const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) => {
-  const dbService = new DatabaseService();
-  const [databaseService, setDatabaseService] = useState<DatabaseService>(dbService);
+  // Lazy initializer: the service (and its CapacitorEngine, database handle and
+  // replicator) is created once per provider, not on every render.
+  const [databaseService, setDatabaseService] = useState<DatabaseService>(
+    () => new DatabaseService()
+  );
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    const initializeDatabase = async () => {
-      try {
-        await dbService.initializeDatabase();
-        setInitialized(true);
-      } catch (e) {
+    let cancelled = false;
+    // initializeDatabase() is idempotent, so React StrictMode's double-invoked
+    // effect does not open the database or start the replicator twice.
+    databaseService
+      .initializeDatabase()
+      .then(() => {
+        if (!cancelled) setInitialized(true);
+      })
+      .catch((e) => {
         console.error("Error initializing database:", e);
-      }
+      });
+    return () => {
+      cancelled = true;
     };
-    initializeDatabase();
-  }, [dbService]);
+  }, [databaseService]);
 
   const databaseServiceValue = useMemo(
     () => ({ databaseService, setDatabaseService }),
